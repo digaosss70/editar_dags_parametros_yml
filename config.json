@@ -1,0 +1,25 @@
+{
+  "conexoes": [
+    "qliksensecloud",
+    "telegram_airflow",
+    "rodrigo_trial_snowflake",
+    "teams_webhook_apikey",
+    "smtp_default"
+  ],
+  "mini_operadores": [
+    "automation",
+    "app",
+    "report_com_status",
+    "report",
+    "espera",
+    "snowflake",
+    "verifica_app_d0",
+    "verifica_app_d1",
+    "enviar_telegram",
+    "enviar_telegram_xcom",
+    "enviar_teams",
+    "enviar_teams_xcom",
+    "enviar_email",
+    "enviar_email_xcom"
+  ]
+}
