@@ -26,38 +26,6 @@ def carregar_configuracoes():
     try:
         with open('config.json', 'r', encoding='utf-8') as f:
             return json.load(f)
-    except FileNotFoundError:
-        st.error("Arquivo config.json não encontrado. Criando configuração padrão...")
-        # Configuração padrão caso o arquivo não exista
-        config_padrao = {
-            "conexoes": [
-                "qliksensecloud",
-                "telegram_airflow", 
-                "rodrigo_trial_snowflake",
-                "teams_webhook_apikey",
-                "smtp_default"
-            ],
-            "mini_operadores": [
-                "automation",
-                "app",
-                "report_com_status",
-                "report",
-                "espera",
-                "snowflake",
-                "verifica_app_d0",
-                "verifica_app_d1",
-                "enviar_telegram",
-                "enviar_telegram_xcom",
-                "enviar_teams",
-                "enviar_teams_xcom",
-                "enviar_email",
-                "enviar_email_xcom"
-            ]
-        }
-        # Salvar arquivo de configuração padrão
-        with open('config.json', 'w', encoding='utf-8') as f:
-            json.dump(config_padrao, f, indent=2, ensure_ascii=False)
-        return config_padrao
     except Exception as e:
         st.error(f"Erro ao carregar configurações: {e}")
         return None
@@ -73,9 +41,9 @@ DAG_TEMPLATE = {
     'dag': {
         'descricao': '',
         'dono': '',
-        'email_em_falha': '',
+        'email_em_falha': 'rodrigo.silva@ext.saint-gobain.com',
         'data_inicial': datetime.now().strftime('%Y-%m-%d'),
-        'agendamento_cron': '',
+        'agendamento_cron': '0 0 * * *',
         'tags': '',
         'quantidade_tentativas': 2,
         'tempo_para_tentativa': 1,
@@ -304,7 +272,15 @@ if st.session_state.dag_data is not None and st.session_state.arquivo_carregado:
                 "Agendamento Cron*", 
                 value=st.session_state.dag_data['dag'].get('agendamento_cron', ''),
                 placeholder="0 0 * * *",
-                help="Formato cron: minuto hora dia mês dia_da_semana"
+                help="""
+                        ┌───────────── minuto (0 - 59)
+                        │ ┌───────────── hora (0 - 23)
+                        │ │ ┌───────────── dia do mês (1 - 31)
+                        │ │ │ ┌───────────── mês (1 - 12)
+                        │ │ │ │ ┌───────────── dia da semana (0 - 6) (0=Domingo)
+                        │ │ │ │ │
+                        * * * * *
+                    """
             )
             
             st.session_state.dag_data['dag']['tags'] = st.text_input(
@@ -423,12 +399,12 @@ if st.session_state.dag_data is not None and st.session_state.arquivo_carregado:
             padding: 1px 0px !important;
         }
         .small-text {
-            font-size: 15px !important;
+            font-size: 12px !important;
         }
         </style>
         """, unsafe_allow_html=True)
 
-        columns_widths = [0.7, 0.2, 0.2, 1.5, 1.0, 0.6, 2]
+        columns_widths = [0.9, 0.3, 0.3, 1.5, 1.2, 0.8, 2]
         
         # Cabeçalho
         cols = st.columns(columns_widths)
@@ -515,9 +491,9 @@ if st.session_state.dag_data is not None and st.session_state.arquivo_carregado:
     yaml_output = download_yaml()
     
     if st.session_state.modo_atual == "Criar Parametro DAG":
-        nome_arquivo = "nova_dag.yml"
+        nome_arquivo = f"{st.session_state.current_task.get('identificador_task', '')}.yml"
     else:
-        nome_arquivo = f"editado_{st.session_state.original_filename}"
+        nome_arquivo = f"{st.session_state.original_filename}"
     
     st.download_button(
         label="📥 Baixar Arquivo YAML",
